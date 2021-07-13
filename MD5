@@ -1,0 +1,15 @@
+a11d14c62eecab83400865a0ad369bc7 *ChangeLog
+8d56b397621f394e096bb18bea26e18d *DESCRIPTION
+eb723b61539feef013de476e68b5c50a *GPL-2
+3bae42572713b5d7ad09c3b643ce6084 *NAMESPACE
+cffe9aa59b59ea21fe6065e7374fad8c *R/code.R
+30996a4c5542167b426e14b5e400b4ec *README
+548734b2810de7442aa560d527d3c047 *build/vignette.rds
+5c67ef850c9a2ac5b0ff045009484966 *inst/COPYRIGHTS
+efcf67449d620d076c675908e33c239e *inst/doc/tRnslate.R
+1331f85ceed9ab9a36e42df00028413b *inst/doc/tRnslate.Rmd
+37a4e2f58b8b1b78c309e87b1fb3ba19 *inst/doc/tRnslate.html
+9ebb7981504854bad78e2616f6ff27c4 *inst/examples/template.txt
+2a42e02d59ee69b77ac25ebe0c28460e *man/tRnslate-package.Rd
+a42d864a66caab51f4fe226e36564524 *man/z_Translate_code_.Rd
+1331f85ceed9ab9a36e42df00028413b *vignettes/tRnslate.Rmd

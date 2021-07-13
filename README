@@ -1,0 +1,25 @@
+The R package tRnslate convert chunks of code or inline code or variables to text or
+source code of some language.
+
+Copyright 2019, Mario Andres Martinez Araya <r@marioma.me>, All rights reserved.
+
+******************************************************************************
+tRnslate is free software; you can redistribute it and/or modify it under
+the terms of the GNU General Public License as published by the Free
+Software Foundation; either version 2, or (at your option) any later
+version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU General Public License along with 
+this program; if not, write to the Free Software Foundation, Inc., 59 Temple 
+Place, Suite 330, Boston, MA  02111-1307  USA
+******************************************************************************
+
+R package tRnslate is currently under development. Therefore use it carefully.
+
+More information can be found at:
+https://marioma.me?i=soft

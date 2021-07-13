@@ -1,0 +1,43 @@
+#!/bin/bash
+@r # This is a chunk (only assignation)
+@r if(.Platform$OS.type=="unix"){
+@r     is_q <- system("clu=$(sinfo --version 2>&1) || clu=`echo -1`; echo $clu",intern = TRUE)
+@r } else {
+@r     is_q <- "-1"
+@r }
+@r s$intro <- ifelse(is_q=="-1", "<:NULL:>", s$intro)
+
+<r@ s$intro @> --partition=<r@ s$partition @>
+<r@ s$intro @> --nodes=<r@ s$nodes @>
+<r@ s$intro @> --tasks-per-node=<r@ s$tasks @>
+<r@ s$intro @> --mem=<r@ s$memory @>
+<r@ s$intro @> --time=<r@ s$time @>
+<r@ s$intro @> --nodes=<r@ s$nodes @>
+
+@r # This is a chunk (only assignation)
+@r # NOTE: remember, separate chunks with empty lines
+@r array <- ifelse(s$array, paste(s$intro," --array=",s$array,sep=""), "")
+<r@ array @>
+
+@r # This is another chunk (only assignation)
+@r if(.Platform$OS.type=="unix"){
+@r     is_mod <- system("mod=$(module --dumpversion 2>&1) || mod=`echo -1`; echo $mod",intern = TRUE)
+@r } else {
+@r     is_mod <- "-1"
+@r }
+
+@r # And this a printing chunk
+@r ifelse(is_mod=="-1", "# module environment not found", paste(s$modules))
+
+@r # And this other printing chunk
+@r if(is_q=="-1"){
+@r     "# no slurm machine"
+@r } else {
+@r     s$workdir
+@r }
+
+@r # And the last chunk (printing)
+@r # NOTE: that it also includes inline elements
+<r@ system("which mpirun",intern = TRUE)@>/mpirun --mca mpi_warn_on_fork 0 -n <r@ s$nodes * s$tasks @> <r@ R.home("bin") @>/Rscript r-code-script.R
+
+echo "Job submitted on $(date +%F) at $(date +%T)." 

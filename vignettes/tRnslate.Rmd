@@ -1,0 +1,416 @@
+---
+title: "tRnslate: _translate chunks or inline R code in source files_"
+author: "Mario A. Martínez Araya"
+date: "2021-07-07"
+url: "https://marioma.me/?i=soft"
+output:
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{tRnslate package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+```
+
+
+
+
+
+
+
+
+<!--meta-->
+
+    Author: Mario A. Martínez Araya
+    Date: 2021-07-07
+    Url: https://marioma.me/?i=soft
+    CRAN: https://cran.r-project.org/package=tRnslate
+<!--meta-->
+
+<!---meta
+    Title: tRnslate: _translate chunks or inline R code in source files_
+    Entry: tRnslate package
+    Engine: knitr::rmarkdown
+    Encoding: UTF-8
+meta--->
+
+
+This R package is intended to translate chunks or inline R code in source files in general, replacing with its output if desired. It was first created to translate scripts for R package generation (to generate R code from R code) and then I used it for something similar within R and Bash scripts necessary for parallel computation using MPI. Then I packaged it independently since it was useful for other purposes as well.
+
+## Requirements
+
+In principle any version of R should be useful but I have not tested them all.
+
+## Installation
+
+The same than for any other R package. You can download the tar file from [CRAN (tRnslate)](https://cran.r-project.org/package=tRnslate) and then install it using
+
+
+    R CMD INSTALL /path/to/tRnslate_0.0.3.tar.gz
+
+<!---
+    RLIBRARY=/path/to/your/R/library
+    PKG_NAME=tRnslate
+    PKG_VERSION=0.0.3
+    #mkdir -p $HOME/Downloads
+    cd $HOME/Downloads
+    wget https://cran.r-project.org/src/contrib/${PKG_NAME}_${PKG_VERSION}.tar.gz
+    R CMD INSTALL --library=${RLIBRARY} ${PKG_NAME}_${PKG_VERSION}.tar.gz
+--->
+
+or from R console
+
+
+    install.packages("tRnslate", lib = "path/to/R/library")
+
+## How to use it?
+
+### 1. Templates with R code in chunks and inline
+
+Imagine you have a template file of any kind called `template.txt`. Let us assume we will write a Bash script for submitting a parallel job using SLURM. Let us read the content from the template which has R code in chunks and inline:
+
+
+    # template with R code
+    T <- readLines(system.file("examples/template.txt", package = "tRnslate"))
+
+In R we can write the content of the template to console:
+
+
+    cat(T, sep = "\n")
+
+    #!/bin/bash
+    @r # This is a chunk (only assignation)
+    @r if(.Platform$OS.type=="unix"){
+    @r     is_q <- system("clu=$(sinfo --version 2>&1) || clu=`echo -1`; echo $clu",intern = TRUE)
+    @r } else {
+    @r     is_q <- "-1"
+    @r }
+    @r s$intro <- ifelse(is_q=="-1", "<:NULL:>", s$intro)
+
+    <r@ s$intro @> --partition=<r@ s$partition @>
+    <r@ s$intro @> --nodes=<r@ s$nodes @>
+    <r@ s$intro @> --tasks-per-node=<r@ s$tasks @>
+    <r@ s$intro @> --mem=<r@ s$memory @>
+    <r@ s$intro @> --time=<r@ s$time @>
+    <r@ s$intro @> --nodes=<r@ s$nodes @>
+
+    @r # This is a chunk (only assignation)
+    @r # NOTE: remember, separate chunks with empty lines
+    @r array <- ifelse(s$array, paste(s$intro," --array=",s$array,sep=""), "")
+    <r@ array @>
+
+    @r # This is another chunk (only assignation)
+    @r if(.Platform$OS.type=="unix"){
+    @r     is_mod <- system("mod=$(module --dumpversion 2>&1) || mod=`echo -1`; echo $mod",intern = TRUE)
+    @r } else {
+    @r     is_mod <- "-1"
+    @r }
+
+    @r # And this a printing chunk
+    @r ifelse(is_mod=="-1", "# module environment not found", paste(s$modules))
+
+    @r # And this other printing chunk
+    @r if(is_q=="-1"){
+    @r     "# no slurm machine"
+    @r } else {
+    @r     s$workdir
+    @r }
+
+    @r # And the last chunk (printing)
+    @r # NOTE: that it also includes inline elements
+    <r@ system("which mpirun",intern = TRUE)@>/mpirun --mca mpi_warn_on_fork 0 -n <r@ s$nodes * s$tasks @> <r@ R.home("bin") @>/Rscript r-code-script.R
+
+    echo "Job submitted on $(date +%F) at $(date +%T)."
+
+<!---
+Let us assume we have this template in a file. Let us read the content from the template:
+
+
+    # template with R code
+    # NOTE: the content between '' could come from a file using readLines
+    #       here I just packed everything in one character string.
+    T <- 'template content ...'
+
+---
+***NOTE***
+
+To ease display, the content of the template was packed in just one character string that was assigned to the R object `T`. However, `T` could also be a character vector where each element represent a line of the template file obtained using `readLines`.
+
+---
+--->
+
+### 2. R code explanation
+
+Lines starting with `@r` or `@R` followed by one space or tabular, define chunks of R code that is also interpreted and translated. The chunks of R code can be _assignation_ or _output_ chunks. Assignation chunks are those including `<-` for assigning an object, while output chunks print R output to the template. Thus several assignation chunks can be placed in adjacent lines, however assignation and output chunks must be separated by one empty line (the same for consecutive output chunks). Alternatively, inline R code can be entered using `<r@ code @>` or  `<R@ code @>`. Inline R code with assignation does not produce output so is replaced by blank, while inline R code producing output will modify the resulting template.
+
+##### *KEEP IN MIND A FEW RULES*
+
+* R code in chunks and inline is evaluated from top to bottom and from left to right in each line.
+* Code chunks allow R comments. In the example above I used them to explain a bit the code in the template.
+* Code chunks can also be marked only using the opening `@r`, for example:
+
+
+        @r # And this other printing chunk
+        @  if(is_q=="-1"){
+        @      "# no slurm machine"
+        @  } else {
+        @      s$workdir
+        @  }
+
+* Do not mix (actions of) assignation with printing in the same chunk. Note, that for an if clause, it is valid that if the condition is true then the chunk action prints and if the condition is false its action assigns.
+* Each printing chunk must produce only one output object.
+* Loops can be used in chunks but only with assignation (no printing).
+* Separate chunks with an empty line.
+* Chunks cannot contain inline R code (so far).
+* Inline code does not allow comments in it.
+* Tend to use inline code mainly for printing (although assignation is allowed).
+* In inline code print objects explicitly using `paste`, `print` or similar commands. For instance, use `<r@ paste("some random string") @>` instead of `<r@ "some random string" @>` which will not be processed similarly as `<r@ some random string @>`.
+
+### 3. Environment used to evaluate the R code
+
+The R code in the template needs to be evaluated in an environment which can be specified by the user. This environment can contain objects which are called from the chunks or inline R code in the template. For example, in the previous template the R code calls an object `s` with several elements (`partition`, `nodes`, `tasks`, etc.) which are being used to replace the content in the template. For this template, to create the environment and object `s` we can do:
+
+
+    # NOTE: this is the environment that will be used later (see below)
+    renv <- new.env(parent = parent.frame())
+    # list with input arguments
+    renv$s <- list(
+        intro = "#SBATCH",
+        partition = "hpc01",
+        nodes = 4,
+        tasks = 10,
+        memory = "2gb",
+        time = "01:00:00",
+        array = FALSE,
+        modules = 'module load openmpi/chosen/module R/chosen/module',
+        workdir = 'cd ${SLURM_SUBMIT_DIR}'
+    )
+
+### 4. The `translate_r_code` command
+
+Given the template above then we can *"translate"* its R code using the function `translate_r_code` as follows:
+
+
+    ## Evaluate the R code
+    TT <- translate_r_code(T, envir = renv)
+
+    ## See the output
+    cat(TT, sep="\n")
+
+<!---
+    TT <- translate_r_code(T, envir = renv, char_drop = "^.*<:NULL:>.*$")
+    TT <- translate_r_code(T, envir = renv, char_clean = "<:NULL:>", char_drop = "^.*<:NULL:>.*$")
+    TT <- translate_r_code(T,
+            chunk_char = "@", inline_char = "@", char_begin = "",
+            char_clean = "", char_drop = "^.*<:NULL:>.*$", envir = renv,
+            comments = TRUE, reduce = TRUE, allow_file = FALSE, debug = "translate_r_code"
+          )
+--->
+
+## Resulting source file
+
+Depending on the system where you execute the previous code, the resulting output will vary. For example, for a multicore PC with [OpenMPI](https://www.open-mpi.org/) but without a dynamic environment modules manager such as [environment-modules](http://modules.sourceforge.net/) or [Lmod](https://lmod.readthedocs.io/en/latest/#) and without a job scheduler such as [SLURM](https://www.schedmd.com/index.php) then the output of `cat(TT, sep="\n")` will be something like this:
+
+
+    #!/bin/bash
+
+    # module environment not found
+
+    # no slurm machine
+
+    /usr/bin/mpirun/mpirun --mca mpi_warn_on_fork 0 -n 40 /usr/lib/R/bin/Rscript r-code-script.R
+
+    echo "Job submitted on $(date +%F) at $(date +%T)." 
+
+While for an HPC cluster having OpenMPI, environment-modules and SLURM the *"translated"* output file will be similar to:
+
+
+    #!/bin/bash
+
+    #SBATCH --partition=hpc01
+    #SBATCH --nodes=4
+    #SBATCH --tasks-per-node=10
+    #SBATCH --mem=2gb
+    #SBATCH --time=01:00:00
+    #SBATCH --nodes=4
+
+    module load openmpi/chosen/module R/chosen/module
+
+    cd ${SLURM_SUBMIT_DIR}
+
+    /usr/bin/mpirun/mpirun --mca mpi_warn_on_fork 0 -n 40 /usr/lib/R/bin/Rscript r-code-script.R
+
+    echo "Job submitted on $(date +%F) at $(date +%T)."
+
+
+Additional rules could be added to control the lenght of the mpirun line, however as it is it works fine. Other source code can be generated following the same principles described before.
+
+<!---
+## A final example
+
+
+    ## library(tRnslate)
+    ## Template packed in one character
+    ## NOTE that chunks can be identified only with one opening @r
+    T <- '#!/bin/bash
+    @r # This is a chunk (only assignation)
+    @r if(.Platform$OS.type=="unix"){
+    @r     is_q <- system("clu=$(sinfo --version 2>&1) || clu=`echo -1`; echo $clu",intern = TRUE)
+    @r } else {
+    @r     is_q <- "-1"
+    @r }
+    @r s$intro <- ifelse(is_q=="-1", "<:NULL:>", s$intro)
+    <r@ s$intro @> --partition=<r@ s$partition @>
+    <r@ s$intro @> --nodes=<r@ s$nodes @>
+    <r@ s$intro @> --tasks-per-node=<r@ s$tasks @>
+    <r@ s$intro @> --mem=<r@ s$memory @>
+    <r@ s$intro @> --time=<r@ s$time @>
+    <r@ s$intro @> --nodes=<r@ s$nodes @>
+
+    @r # This is a chunk (only assignation)
+    @  # NOTE: remember, separate chunks with empty lines
+    @  array <- ifelse(s$array, paste(s$intro," --array=",s$array,sep=""), "")
+
+    <r@ array @>
+
+    @r # This is another chunk (only assignation)
+    @r if(.Platform$OS.type=="unix"){
+    @r     is_mod <- system("mod=$(module --dumpversion 2>&1) || mod=`echo -1`; echo $mod",intern = TRUE)
+    @r } else {
+    @r     is_mod <- "-1"
+    @r }
+
+    @r  # And this a printing chunk
+    @  ifelse(is_mod=="-1", "# module environment not found", paste(s$modules))
+
+    @r # And this other printing chunk
+    @  if(is_q=="-1"){
+    @      "# no slurm machine"
+    @  } else {
+    @      s$workdir
+    @  }
+
+    @r b <- rbinom(1, 1, 0.5)
+
+    @r # this is an R comment in a chunk (no output to the template)
+
+    @r "# this is not an R comment in a chunk and will be printed to the template"
+
+    @r paste("# this also is not an R comment and will be printed to the template")
+
+    <r@ # this is an inline R comment (no output to the template) @>
+    <r@ "# this will be also considered an inline R comment (no output to the template)" @>
+    <r@ paste("# this is not an inline R comment and will be printed to the template") @>
+
+    <r@ toprint <- "# this is cool!" @>
+    <r@ toprint @>
+    <r@ paste(toprint, "with paste...") @>
+
+    <r@ paste("# b =", b) @>
+
+    @r # A printing or assignation chunk depending on some condition
+    @r if(b){
+    @      o <- "o exists"
+    @  } else {
+    @      "# o should not exist."
+    @  }
+
+    <r@ paste("# exists o?") @>
+
+    @r exists("o")
+
+    @r # assignation disable printing
+    @r paste(i <- 0)
+
+    @r u <- seq(1,10,1)
+    @  tt <- NULL
+    @  for(j in u){ tt <- paste(tt,j,sep="",collapse="") }
+    <r@ paste(tt) @>
+
+    @r tt <- NULL
+    @  for(j in u){
+    @      tt <- paste(tt,j,sep="",collapse="")
+    @  }
+    <r@ paste(tt) @>
+
+    @r for(j in u){
+    @      paste(ifelse(rbinom(1,1,0.5)==1,TRUE,FALSE))
+    @  }
+
+    @r paste(i+1)
+
+    @r paste(i+2)
+
+    @r paste(i+3)
+
+    <r@ system("which mpirun",intern = TRUE)@>/mpirun --mca mpi_warn_on_fork 0 -n <r@ s$nodes * s$tasks @> <r@ R.home("bin") @>/Rscript r-code-script.R
+
+    echo "Job submitted on $(date +%F) at $(date +%T)."
+    '
+
+    # NOTE: this is the environment that will be used later (see below)
+    renv <- new.env(parent = parent.frame())
+    # list with input arguments
+    renv$s <- list(
+        intro = "#SBATCH",
+        partition = "hpc01",
+        nodes = 4,
+        tasks = 10,
+        memory = "2gb",
+        time = "01:00:00",
+        array = FALSE,
+        modules = 'module load openmpi/chosen/module R/chosen/module',
+        workdir = 'cd ${SLURM_SUBMIT_DIR}'
+    )
+
+    ## translate R code
+    ## TT <- translate_r_code(T, envir = renv)
+    TT <- tRnslate::translate_r_code(T, envir = renv)
+
+    ## see output
+    cat(TT, sep = "\n")
+--->
+
+## Limitations
+
+As it is, `translate_r_code` has some limitations such as:
+
+* For printing strings in inline code it is recommended to use always `paste`. Otherwise it will not evaluate R code.
+* Inline code does not allow comments and requires using `paste` to print its content to template.
+* Inline code cannot be placed within chunks of R code (almost certainly it will fail). For example: 
+
+
+        @r ## Chunk A with inline code. It will fail :(
+        @r ## because there is still no object called <r@ path @>.
+        @r a <- file.path(ifelse(condition, <r@ path @>, getwd()),"file.txt")
+
+* Printing chunks must generate a unique output object (either vector, list, array, character, etc.). If multiple objects are being printed, then it will only print the last one or none.
+* If a chunk aimed at printing includes an assignation, then the printing will be omitted.
+* Tasks must be separated in independent chunks. Most R statements are allowed (`for`, `while`, `if`, `{...}`, etc.) but with some limitations:
+
+    * Conditionals can be used within chunks but the action must not mix assignation with printing.
+    * Loops can be used in chunks but only with assignation (no printing).
+
+* And surely there are others. If you find any errors/bugs, please let me know.
+
+Therefore, use this function carefully. 
+
+##### *RECOMMENDATIONS*
+
+1. Never replace the content of a template writing the output to the same file.
+
+2. Always check the content of the *"translated"* output before using it for other tasks.
+
+3. Be cautious.
+
+## References
+
+* [Writing R Extensions](https://cran.r-project.org/doc/manuals/R-exts.html)
+* [Writing Vignettes](https://bookdown.org/yihui/rmarkdown/r-package-vignette.html)
+* [SLURM documentation](https://slurm.schedmd.com/)
+* [Environment modules documentation](https://modules.readthedocs.io/en/latest/)
+* [OpenMPI documentation](https://www.open-mpi.org/doc/)

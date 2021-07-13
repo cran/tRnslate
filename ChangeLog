@@ -1,0 +1,28 @@
+ChangeLog tRnslate
+
+Author: Mario A. Martínez A.
+
+2021-07-07 - Version 0.0.3
+
+* Released version.
+* Simplified syntax.
+* Debug enabled.
+* Reduce output extension when there are too many empty lines.
+
+2020-02-11 - Version 0.0.2
+
+* Allows different characters for chunks or inline R code (important for aTools and tmplate).
+* Patterns in delete_comments are specific for tRnslate. It allows to remove comments at the end of line.
+
+2019-11-21 - Version 0.0.1
+
+* Logic for template creation including inline R code.
+* Translate templates to any type of file.
+* Translate inline R code.
+* R chunks started by default by @r or @R. However, they needed to start just at the beginning of line (^@r or ^@R). Now there can be empty space before them (^[[:blank:]]*@r or ^[[:blank:]]*@R) which is useful for indented templates.
+* Fix to replace_r_code so that lines of chunks of R code without output
+can be deleted in the translated template.
+* Fix to long R code chunks translation. Now they can be separated with
+empty spaces, so that each chunk produces different output.
+* Now assignation and output chunk need to be separated by empty line.
+* Vignette updated to reflect these changes.

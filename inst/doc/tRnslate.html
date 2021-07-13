@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Mario A. Martínez Araya" />
+
+<meta name="date" content="2021-07-07" />
+
+<title>tRnslate: translate chunks or inline R code in source files</title>
+
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">tRnslate: <em>translate chunks or inline R code in source files</em></h1>
+<h4 class="author">Mario A. Martínez Araya</h4>
+<h4 class="date">2021-07-07</h4>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#requirements">Requirements</a></li>
+<li><a href="#installation">Installation</a></li>
+<li><a href="#how-to-use-it">How to use it?</a><ul>
+<li><a href="#templates-with-r-code-in-chunks-and-inline">1. Templates with R code in chunks and inline</a></li>
+<li><a href="#r-code-explanation">2. R code explanation</a></li>
+<li><a href="#environment-used-to-evaluate-the-r-code">3. Environment used to evaluate the R code</a></li>
+<li><a href="#the-translate_r_code-command">4. The <code>translate_r_code</code> command</a></li>
+</ul></li>
+<li><a href="#resulting-source-file">Resulting source file</a></li>
+<li><a href="#limitations">Limitations</a></li>
+<li><a href="#references">References</a></li>
+</ul>
+</div>
+
+<!--meta-->
+<pre><code>Author: Mario A. Martínez Araya
+Date: 2021-07-07
+Url: https://marioma.me/?i=soft
+CRAN: https://cran.r-project.org/package=tRnslate</code></pre>
+<!--meta-->
+<!---meta
+    Title: tRnslate: _translate chunks or inline R code in source files_
+    Entry: tRnslate package
+    Engine: knitr::rmarkdown
+    Encoding: UTF-8
+meta--->
+<p>This R package is intended to translate chunks or inline R code in source files in general, replacing with its output if desired. It was first created to translate scripts for R package generation (to generate R code from R code) and then I used it for something similar within R and Bash scripts necessary for parallel computation using MPI. Then I packaged it independently since it was useful for other purposes as well.</p>
+<div id="requirements" class="section level2">
+<h2>Requirements</h2>
+<p>In principle any version of R should be useful but I have not tested them all.</p>
+</div>
+<div id="installation" class="section level2">
+<h2>Installation</h2>
+<p>The same than for any other R package. You can download the tar file from <a href="https://cran.r-project.org/package=tRnslate">CRAN (tRnslate)</a> and then install it using</p>
+<pre><code>R CMD INSTALL /path/to/tRnslate_0.0.3.tar.gz</code></pre>
+<!---
+    RLIBRARY=/path/to/your/R/library
+    PKG_NAME=tRnslate
+    PKG_VERSION=0.0.3
+    #mkdir -p $HOME/Downloads
+    cd $HOME/Downloads
+    wget https://cran.r-project.org/src/contrib/${PKG_NAME}_${PKG_VERSION}.tar.gz
+    R CMD INSTALL --library=${RLIBRARY} ${PKG_NAME}_${PKG_VERSION}.tar.gz
+--->
+<p>or from R console</p>
+<pre><code>install.packages(&quot;tRnslate&quot;, lib = &quot;path/to/R/library&quot;)</code></pre>
+</div>
+<div id="how-to-use-it" class="section level2">
+<h2>How to use it?</h2>
+<div id="templates-with-r-code-in-chunks-and-inline" class="section level3">
+<h3>1. Templates with R code in chunks and inline</h3>
+<p>Imagine you have a template file of any kind called <code>template.txt</code>. Let us assume we will write a Bash script for submitting a parallel job using SLURM. Let us read the content from the template which has R code in chunks and inline:</p>
+<pre><code># template with R code
+T &lt;- readLines(system.file(&quot;examples/template.txt&quot;, package = &quot;tRnslate&quot;))</code></pre>
+<p>In R we can write the content of the template to console:</p>
+<pre><code>cat(T, sep = &quot;\n&quot;)
+
+#!/bin/bash
+@r # This is a chunk (only assignation)
+@r if(.Platform$OS.type==&quot;unix&quot;){
+@r     is_q &lt;- system(&quot;clu=$(sinfo --version 2&gt;&amp;1) || clu=`echo -1`; echo $clu&quot;,intern = TRUE)
+@r } else {
+@r     is_q &lt;- &quot;-1&quot;
+@r }
+@r s$intro &lt;- ifelse(is_q==&quot;-1&quot;, &quot;&lt;:NULL:&gt;&quot;, s$intro)
+
+&lt;r@ s$intro @&gt; --partition=&lt;r@ s$partition @&gt;
+&lt;r@ s$intro @&gt; --nodes=&lt;r@ s$nodes @&gt;
+&lt;r@ s$intro @&gt; --tasks-per-node=&lt;r@ s$tasks @&gt;
+&lt;r@ s$intro @&gt; --mem=&lt;r@ s$memory @&gt;
+&lt;r@ s$intro @&gt; --time=&lt;r@ s$time @&gt;
+&lt;r@ s$intro @&gt; --nodes=&lt;r@ s$nodes @&gt;
+
+@r # This is a chunk (only assignation)
+@r # NOTE: remember, separate chunks with empty lines
+@r array &lt;- ifelse(s$array, paste(s$intro,&quot; --array=&quot;,s$array,sep=&quot;&quot;), &quot;&quot;)
+&lt;r@ array @&gt;
+
+@r # This is another chunk (only assignation)
+@r if(.Platform$OS.type==&quot;unix&quot;){
+@r     is_mod &lt;- system(&quot;mod=$(module --dumpversion 2&gt;&amp;1) || mod=`echo -1`; echo $mod&quot;,intern = TRUE)
+@r } else {
+@r     is_mod &lt;- &quot;-1&quot;
+@r }
+
+@r # And this a printing chunk
+@r ifelse(is_mod==&quot;-1&quot;, &quot;# module environment not found&quot;, paste(s$modules))
+
+@r # And this other printing chunk
+@r if(is_q==&quot;-1&quot;){
+@r     &quot;# no slurm machine&quot;
+@r } else {
+@r     s$workdir
+@r }
+
+@r # And the last chunk (printing)
+@r # NOTE: that it also includes inline elements
+&lt;r@ system(&quot;which mpirun&quot;,intern = TRUE)@&gt;/mpirun --mca mpi_warn_on_fork 0 -n &lt;r@ s$nodes * s$tasks @&gt; &lt;r@ R.home(&quot;bin&quot;) @&gt;/Rscript r-code-script.R
+
+echo &quot;Job submitted on $(date +%F) at $(date +%T).&quot;</code></pre>
+<!---
+Let us assume we have this template in a file. Let us read the content from the template:
+
+
+    # template with R code
+    # NOTE: the content between '' could come from a file using readLines
+    #       here I just packed everything in one character string.
+    T <- 'template content ...'
+
+---
+***NOTE***
+
+To ease display, the content of the template was packed in just one character string that was assigned to the R object `T`. However, `T` could also be a character vector where each element represent a line of the template file obtained using `readLines`.
+
+---
+--->
+</div>
+<div id="r-code-explanation" class="section level3">
+<h3>2. R code explanation</h3>
+<p>Lines starting with <code>@r</code> or <code>@R</code> followed by one space or tabular, define chunks of R code that is also interpreted and translated. The chunks of R code can be <em>assignation</em> or <em>output</em> chunks. Assignation chunks are those including <code>&lt;-</code> for assigning an object, while output chunks print R output to the template. Thus several assignation chunks can be placed in adjacent lines, however assignation and output chunks must be separated by one empty line (the same for consecutive output chunks). Alternatively, inline R code can be entered using <code>&lt;r@ code @&gt;</code> or <code>&lt;R@ code @&gt;</code>. Inline R code with assignation does not produce output so is replaced by blank, while inline R code producing output will modify the resulting template.</p>
+<div id="keep-in-mind-a-few-rules" class="section level5">
+<h5><em>KEEP IN MIND A FEW RULES</em></h5>
+<ul>
+<li>R code in chunks and inline is evaluated from top to bottom and from left to right in each line.</li>
+<li>Code chunks allow R comments. In the example above I used them to explain a bit the code in the template.</li>
+<li><p>Code chunks can also be marked only using the opening <code>@r</code>, for example:</p>
+<pre><code>  @r # And this other printing chunk
+  @  if(is_q==&quot;-1&quot;){
+  @      &quot;# no slurm machine&quot;
+  @  } else {
+  @      s$workdir
+  @  }</code></pre></li>
+<li>Do not mix (actions of) assignation with printing in the same chunk. Note, that for an if clause, it is valid that if the condition is true then the chunk action prints and if the condition is false its action assigns.</li>
+<li>Each printing chunk must produce only one output object.</li>
+<li>Loops can be used in chunks but only with assignation (no printing).</li>
+<li>Separate chunks with an empty line.</li>
+<li>Chunks cannot contain inline R code (so far).</li>
+<li>Inline code does not allow comments in it.</li>
+<li>Tend to use inline code mainly for printing (although assignation is allowed).</li>
+<li><p>In inline code print objects explicitly using <code>paste</code>, <code>print</code> or similar commands. For instance, use <code>&lt;r@ paste(&quot;some random string&quot;) @&gt;</code> instead of <code>&lt;r@ &quot;some random string&quot; @&gt;</code> which will not be processed similarly as <code>&lt;r@ some random string @&gt;</code>.</p></li>
+</ul>
+</div>
+</div>
+<div id="environment-used-to-evaluate-the-r-code" class="section level3">
+<h3>3. Environment used to evaluate the R code</h3>
+<p>The R code in the template needs to be evaluated in an environment which can be specified by the user. This environment can contain objects which are called from the chunks or inline R code in the template. For example, in the previous template the R code calls an object <code>s</code> with several elements (<code>partition</code>, <code>nodes</code>, <code>tasks</code>, etc.) which are being used to replace the content in the template. For this template, to create the environment and object <code>s</code> we can do:</p>
+<pre><code># NOTE: this is the environment that will be used later (see below)
+renv &lt;- new.env(parent = parent.frame())
+# list with input arguments
+renv$s &lt;- list(
+    intro = &quot;#SBATCH&quot;,
+    partition = &quot;hpc01&quot;,
+    nodes = 4,
+    tasks = 10,
+    memory = &quot;2gb&quot;,
+    time = &quot;01:00:00&quot;,
+    array = FALSE,
+    modules = 'module load openmpi/chosen/module R/chosen/module',
+    workdir = 'cd ${SLURM_SUBMIT_DIR}'
+)</code></pre>
+</div>
+<div id="the-translate_r_code-command" class="section level3">
+<h3>4. The <code>translate_r_code</code> command</h3>
+<p>Given the template above then we can <em>“translate”</em> its R code using the function <code>translate_r_code</code> as follows:</p>
+<pre><code>## Evaluate the R code
+TT &lt;- translate_r_code(T, envir = renv)
+
+## See the output
+cat(TT, sep=&quot;\n&quot;)</code></pre>
+<!---
+    TT <- translate_r_code(T, envir = renv, char_drop = "^.*<:NULL:>.*$")
+    TT <- translate_r_code(T, envir = renv, char_clean = "<:NULL:>", char_drop = "^.*<:NULL:>.*$")
+    TT <- translate_r_code(T,
+            chunk_char = "@", inline_char = "@", char_begin = "",
+            char_clean = "", char_drop = "^.*<:NULL:>.*$", envir = renv,
+            comments = TRUE, reduce = TRUE, allow_file = FALSE, debug = "translate_r_code"
+          )
+--->
+</div>
+</div>
+<div id="resulting-source-file" class="section level2">
+<h2>Resulting source file</h2>
+<p>Depending on the system where you execute the previous code, the resulting output will vary. For example, for a multicore PC with <a href="https://www.open-mpi.org/">OpenMPI</a> but without a dynamic environment modules manager such as <a href="http://modules.sourceforge.net/">environment-modules</a> or <a href="https://lmod.readthedocs.io/en/latest/#">Lmod</a> and without a job scheduler such as <a href="https://www.schedmd.com/index.php">SLURM</a> then the output of <code>cat(TT, sep=&quot;\n&quot;)</code> will be something like this:</p>
+<pre><code>#!/bin/bash
+
+# module environment not found
+
+# no slurm machine
+
+/usr/bin/mpirun/mpirun --mca mpi_warn_on_fork 0 -n 40 /usr/lib/R/bin/Rscript r-code-script.R
+
+echo &quot;Job submitted on $(date +%F) at $(date +%T).&quot; </code></pre>
+<p>While for an HPC cluster having OpenMPI, environment-modules and SLURM the <em>“translated”</em> output file will be similar to:</p>
+<pre><code>#!/bin/bash
+
+#SBATCH --partition=hpc01
+#SBATCH --nodes=4
+#SBATCH --tasks-per-node=10
+#SBATCH --mem=2gb
+#SBATCH --time=01:00:00
+#SBATCH --nodes=4
+
+module load openmpi/chosen/module R/chosen/module
+
+cd ${SLURM_SUBMIT_DIR}
+
+/usr/bin/mpirun/mpirun --mca mpi_warn_on_fork 0 -n 40 /usr/lib/R/bin/Rscript r-code-script.R
+
+echo &quot;Job submitted on $(date +%F) at $(date +%T).&quot;</code></pre>
+<p>Additional rules could be added to control the lenght of the mpirun line, however as it is it works fine. Other source code can be generated following the same principles described before.</p>
+<!---
+## A final example
+
+
+    ## library(tRnslate)
+    ## Template packed in one character
+    ## NOTE that chunks can be identified only with one opening @r
+    T <- '#!/bin/bash
+    @r # This is a chunk (only assignation)
+    @r if(.Platform$OS.type=="unix"){
+    @r     is_q <- system("clu=$(sinfo --version 2>&1) || clu=`echo -1`; echo $clu",intern = TRUE)
+    @r } else {
+    @r     is_q <- "-1"
+    @r }
+    @r s$intro <- ifelse(is_q=="-1", "<:NULL:>", s$intro)
+    <r@ s$intro @> --partition=<r@ s$partition @>
+    <r@ s$intro @> --nodes=<r@ s$nodes @>
+    <r@ s$intro @> --tasks-per-node=<r@ s$tasks @>
+    <r@ s$intro @> --mem=<r@ s$memory @>
+    <r@ s$intro @> --time=<r@ s$time @>
+    <r@ s$intro @> --nodes=<r@ s$nodes @>
+
+    @r # This is a chunk (only assignation)
+    @  # NOTE: remember, separate chunks with empty lines
+    @  array <- ifelse(s$array, paste(s$intro," --array=",s$array,sep=""), "")
+
+    <r@ array @>
+
+    @r # This is another chunk (only assignation)
+    @r if(.Platform$OS.type=="unix"){
+    @r     is_mod <- system("mod=$(module --dumpversion 2>&1) || mod=`echo -1`; echo $mod",intern = TRUE)
+    @r } else {
+    @r     is_mod <- "-1"
+    @r }
+
+    @r  # And this a printing chunk
+    @  ifelse(is_mod=="-1", "# module environment not found", paste(s$modules))
+
+    @r # And this other printing chunk
+    @  if(is_q=="-1"){
+    @      "# no slurm machine"
+    @  } else {
+    @      s$workdir
+    @  }
+
+    @r b <- rbinom(1, 1, 0.5)
+
+    @r # this is an R comment in a chunk (no output to the template)
+
+    @r "# this is not an R comment in a chunk and will be printed to the template"
+
+    @r paste("# this also is not an R comment and will be printed to the template")
+
+    <r@ # this is an inline R comment (no output to the template) @>
+    <r@ "# this will be also considered an inline R comment (no output to the template)" @>
+    <r@ paste("# this is not an inline R comment and will be printed to the template") @>
+
+    <r@ toprint <- "# this is cool!" @>
+    <r@ toprint @>
+    <r@ paste(toprint, "with paste...") @>
+
+    <r@ paste("# b =", b) @>
+
+    @r # A printing or assignation chunk depending on some condition
+    @r if(b){
+    @      o <- "o exists"
+    @  } else {
+    @      "# o should not exist."
+    @  }
+
+    <r@ paste("# exists o?") @>
+
+    @r exists("o")
+
+    @r # assignation disable printing
+    @r paste(i <- 0)
+
+    @r u <- seq(1,10,1)
+    @  tt <- NULL
+    @  for(j in u){ tt <- paste(tt,j,sep="",collapse="") }
+    <r@ paste(tt) @>
+
+    @r tt <- NULL
+    @  for(j in u){
+    @      tt <- paste(tt,j,sep="",collapse="")
+    @  }
+    <r@ paste(tt) @>
+
+    @r for(j in u){
+    @      paste(ifelse(rbinom(1,1,0.5)==1,TRUE,FALSE))
+    @  }
+
+    @r paste(i+1)
+
+    @r paste(i+2)
+
+    @r paste(i+3)
+
+    <r@ system("which mpirun",intern = TRUE)@>/mpirun --mca mpi_warn_on_fork 0 -n <r@ s$nodes * s$tasks @> <r@ R.home("bin") @>/Rscript r-code-script.R
+
+    echo "Job submitted on $(date +%F) at $(date +%T)."
+    '
+
+    # NOTE: this is the environment that will be used later (see below)
+    renv <- new.env(parent = parent.frame())
+    # list with input arguments
+    renv$s <- list(
+        intro = "#SBATCH",
+        partition = "hpc01",
+        nodes = 4,
+        tasks = 10,
+        memory = "2gb",
+        time = "01:00:00",
+        array = FALSE,
+        modules = 'module load openmpi/chosen/module R/chosen/module',
+        workdir = 'cd ${SLURM_SUBMIT_DIR}'
+    )
+
+    ## translate R code
+    ## TT <- translate_r_code(T, envir = renv)
+    TT <- tRnslate::translate_r_code(T, envir = renv)
+
+    ## see output
+    cat(TT, sep = "\n")
+--->
+</div>
+<div id="limitations" class="section level2">
+<h2>Limitations</h2>
+<p>As it is, <code>translate_r_code</code> has some limitations such as:</p>
+<ul>
+<li>For printing strings in inline code it is recommended to use always <code>paste</code>. Otherwise it will not evaluate R code.</li>
+<li>Inline code does not allow comments and requires using <code>paste</code> to print its content to template.</li>
+<li><p>Inline code cannot be placed within chunks of R code (almost certainly it will fail). For example:</p>
+<pre><code>  @r ## Chunk A with inline code. It will fail :(
+  @r ## because there is still no object called &lt;r@ path @&gt;.
+  @r a &lt;- file.path(ifelse(condition, &lt;r@ path @&gt;, getwd()),&quot;file.txt&quot;)</code></pre></li>
+<li>Printing chunks must generate a unique output object (either vector, list, array, character, etc.). If multiple objects are being printed, then it will only print the last one or none.</li>
+<li>If a chunk aimed at printing includes an assignation, then the printing will be omitted.</li>
+<li><p>Tasks must be separated in independent chunks. Most R statements are allowed (<code>for</code>, <code>while</code>, <code>if</code>, <code>{...}</code>, etc.) but with some limitations:</p>
+<ul>
+<li>Conditionals can be used within chunks but the action must not mix assignation with printing.</li>
+<li>Loops can be used in chunks but only with assignation (no printing).</li>
+</ul></li>
+<li><p>And surely there are others. If you find any errors/bugs, please let me know.</p></li>
+</ul>
+<p>Therefore, use this function carefully.</p>
+<div id="recommendations" class="section level5">
+<h5><em>RECOMMENDATIONS</em></h5>
+<ol style="list-style-type: decimal">
+<li><p>Never replace the content of a template writing the output to the same file.</p></li>
+<li><p>Always check the content of the <em>“translated”</em> output before using it for other tasks.</p></li>
+<li><p>Be cautious.</p></li>
+</ol>
+</div>
+</div>
+<div id="references" class="section level2">
+<h2>References</h2>
+<ul>
+<li><a href="https://cran.r-project.org/doc/manuals/R-exts.html">Writing R Extensions</a></li>
+<li><a href="https://bookdown.org/yihui/rmarkdown/r-package-vignette.html">Writing Vignettes</a></li>
+<li><a href="https://slurm.schedmd.com/">SLURM documentation</a></li>
+<li><a href="https://modules.readthedocs.io/en/latest/">Environment modules documentation</a></li>
+<li><a href="https://www.open-mpi.org/doc/">OpenMPI documentation</a></li>
+</ul>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
